@@ -1,8 +1,8 @@
 #pragma once
 // MacroCalendarService — DataHub producer for the upcoming macro/economic
-// events feed served by Fincept's API (`api.fincept.in/macro/upcoming-events`).
+// events feed served by StockQuant's independent economic-calendar source.
 //
-// Topic: `econ:fincept:upcoming_events`. Payload: `QJsonArray` (the events
+// Topic: `econ:stockquant:upcoming_events`. Payload: `QJsonArray` (the events
 // array as returned by the API). One topic, one producer, one HTTP fetch
 // per refresh — the hub fans out to the EconomicCalendarWidget and any
 // future consumers (report builder, MCP tools, agents).
