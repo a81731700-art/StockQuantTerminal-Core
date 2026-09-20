@@ -155,7 +155,7 @@ SettingsScreen::SettingsScreen(QWidget* parent) : QWidget(parent) {
     make_btn(QStringLiteral("Python Env"), 11, QStringLiteral("packages venv pip uv numpy libraries install upgrade"));
     make_btn(QStringLiteral("Storage & Cache"), 3,
              QStringLiteral("disk database sqlite sql console cache clear delete data danger zone workspaces"));
-    make_btn(QStringLiteral("Cloud Sync"), 15, QStringLiteral("backup sync account devices domains credits"));
+    // StockQuant local-only build: Cloud Sync UI intentionally disabled.
 
     first->setChecked(true);
     sections_->setCurrentIndex(14);
