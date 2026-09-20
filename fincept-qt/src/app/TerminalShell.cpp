@@ -155,7 +155,7 @@ void TerminalShell::initialise() {
         auto local_r = SettingsRepository::instance().get("telemetry.local_enabled");
         const bool local_enabled = local_r.is_ok() && local_r.value() == "true";
         auto cloud_r = SettingsRepository::instance().get("telemetry.cloud_enabled");
-        const bool cloud_enabled = cloud_r.is_ok() && cloud_r.value() == "true";
+        const bool cloud_enabled = false; // StockQuant: outbound cloud telemetry disabled
 
         // Provider singletons live for the process lifetime; statics keep
         // them out of the heap-leak audit. Construction order matters:
