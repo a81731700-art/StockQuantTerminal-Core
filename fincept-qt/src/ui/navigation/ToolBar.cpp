@@ -78,7 +78,7 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent) {
 
     sep();
     // FINCEPT / TERMINAL are brand marks — set raw, never translated.
-    fincept_label_ = mk(QStringLiteral("FINCEPT "));
+    fincept_label_ = mk(QStringLiteral("STOCKQUANT "));
     hl->addWidget(fincept_label_);
     branding_label_ = mk(QStringLiteral("TERMINAL"));
     hl->addWidget(branding_label_);
@@ -145,6 +145,18 @@ ToolBar::ToolBar(QWidget* parent) : QWidget(parent) {
     logout_btn_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(logout_btn_, &QPushButton::clicked, this, &ToolBar::logout_clicked);
     hl->addWidget(logout_btn_);
+
+    user_label_->setVisible(false);
+    credits_label_->setVisible(false);
+    plan_btn_->setVisible(false);
+    upgrade_btn_->setVisible(false);
+    logout_btn_->setVisible(false);
+    if (separators_.size() >= 7) {
+        separators_[3]->setVisible(false);
+        separators_[4]->setVisible(false);
+        separators_[5]->setVisible(false);
+        separators_[6]->setVisible(false);
+    }
 
     retranslateUi();
 
@@ -279,7 +291,6 @@ void ToolBar::apply_responsive_layout(int w) {
     bool show_subtitle = (w >= 1200);
     bool show_clock = (w >= 800);
     bool show_live = (w >= 800);
-    bool show_credits = (w >= 650);
     bool show_chat = (w >= 650);
 
     if (subtitle_label_)
@@ -291,15 +302,17 @@ void ToolBar::apply_responsive_layout(int w) {
     if (live_label_)
         live_label_->setVisible(show_live);
     if (credits_label_)
-        credits_label_->setVisible(show_credits);
+        credits_label_->setVisible(false); // StockQuant: no Fincept credit balance UI
     if (chat_mode_btn_)
         chat_mode_btn_->setVisible(show_chat);
 
     // Two extra separators were added to bracket the inline pushpin bar at
     // the start of the layout, so the credits/chat separator indices shift by 2.
     if (separators_.size() >= 7) {
-        separators_[4]->setVisible(show_credits);
-        separators_[5]->setVisible(show_chat);
+        separators_[3]->setVisible(false);
+        separators_[4]->setVisible(false);
+        separators_[5]->setVisible(false);
+        separators_[6]->setVisible(false);
     }
 }
 
@@ -533,9 +546,8 @@ QMenu* ToolBar::build_help_menu() {
     m->addAction(tr("Privacy Policy"), this, [this]() { emit navigate_to("privacy"); });
     m->addAction(tr("Trademarks"), this, [this]() { emit navigate_to("trademarks"); });
     m->addSeparator();
-    m->addAction(tr("Check for Updates"), this, [this]() { emit action_triggered("check_updates"); });
-    m->addSeparator();
-    m->addAction(tr("Logout"), this, [this]() { emit action_triggered("logout"); });
+    // StockQuant upgrades are delivered from our own build pipeline.
+    // Fincept update/logout actions are intentionally omitted.
     return m;
 }
 
