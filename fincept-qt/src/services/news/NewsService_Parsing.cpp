@@ -111,10 +111,16 @@ QVector<NewsArticle> NewsService::parse_rss_xml(const QByteArray& xml, const RSS
                 if (current.headline.isEmpty())
                     continue;
 
-                if (current.time.isEmpty())
-                    current.time = QDateTime::currentDateTime().toString("MMM dd, HH:mm");
+                // StockQuant: never invent a current timestamp for an undated
+                // feed item; doing so can make stale publisher content look fresh.
                 if (current.sort_ts == 0)
-                    current.sort_ts = QDateTime::currentSecsSinceEpoch();
+                    continue;
+
+                const qint64 now = QDateTime::currentSecsSinceEpoch();
+                constexpr qint64 kMaxFutureSkewSec = 6 * 60 * 60;
+                constexpr qint64 kMaxArticleAgeSec = 14 * 24 * 60 * 60;
+                if (current.sort_ts > now + kMaxFutureSkewSec || current.sort_ts < now - kMaxArticleAgeSec)
+                    continue;
 
                 enrich_article(current);
                 articles.append(std::move(current));
