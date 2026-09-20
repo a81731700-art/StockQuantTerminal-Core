@@ -28,18 +28,8 @@ CloudTelemetryProvider::~CloudTelemetryProvider() {
 }
 
 void CloudTelemetryProvider::start() {
-    if (started_)
-        return;
-    if (!nam_)
-        nam_ = new QNetworkAccessManager(this);
-    if (!flush_timer_) {
-        flush_timer_ = new QTimer(this);
-        flush_timer_->setInterval(kFlushIntervalMs);
-        connect(flush_timer_, &QTimer::timeout, this, &CloudTelemetryProvider::on_flush_tick);
-    }
-    flush_timer_->start();
-    started_ = true;
-    LOG_INFO(kCloudTag, "Cloud telemetry uploader started");
+    started_ = false;
+    LOG_INFO(kCloudTag, "StockQuant local-only build: cloud telemetry disabled");
 }
 
 void CloudTelemetryProvider::stop() {
