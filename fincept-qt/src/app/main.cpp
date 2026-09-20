@@ -562,7 +562,7 @@ int main(int argc, char* argv[]) {
             &fincept::services::cloud::NewsFeedCloudAdapter::instance());
         fincept::services::cloud::CloudSyncEngine::instance().register_adapter(
             &fincept::services::cloud::NotebookCloudAdapter::instance());
-        fincept::services::cloud::CloudSyncEngine::instance().initialize();
+        // StockQuant local-only build: CloudSyncEngine startup disabled.
     };
 
     // ── Group 3: wallet / treasury / billing + broker session monitor ───────
