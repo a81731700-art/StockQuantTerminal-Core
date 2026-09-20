@@ -222,22 +222,18 @@ bool AuthManager::needs_pin_setup() const {
 
 void AuthManager::initialize() {
     set_loading(true);
-    load_session();
-
-    if (!session_.api_key.isEmpty()) {
-        // Apply api_key ONLY — do NOT send the stale session_token during
-        // startup validation. The server enforces single-session via
-        // X-Session-Token; sending a stale one triggers 401 even though
-        // the api_key is perfectly valid and permanent.
-        auto& http = fincept::HttpClient::instance();
-        http.set_auth_header(session_.api_key);
-        http.clear_session_token();
-
-        validate_saved_session();
-        return;
-    }
-
+    clear_tokens();
+    session_ = SessionData{};
+    session_.authenticated = true;
+    session_.device_id = QStringLiteral("stockquant_local");
+    session_.user_info.username = QStringLiteral("StockQuant Local");
+    session_.user_info.email = QStringLiteral("local@stockquant.invalid");
+    session_.user_info.account_type = QStringLiteral("pro");
+    session_.user_info.is_verified = true;
+    session_.subscription.account_type = QStringLiteral("pro");
+    session_.has_subscription = true;
     set_loading(false);
+    LOG_INFO("Auth", "StockQuant local session initialized; Fincept cloud auth disabled");
     emit auth_state_changed();
 }
 
