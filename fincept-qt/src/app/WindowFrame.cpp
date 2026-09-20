@@ -222,8 +222,8 @@ WindowFrame::WindowFrame(int window_id, QWidget* parent, const WindowId& adopted
     // "Fincept Terminal" is the product brand and is intentionally not
     // translated — the bracketed profile name is the only variable part.
     const QString profile = ProfileManager::instance().active();
-    setWindowTitle(profile == "default" ? QStringLiteral("Fincept Terminal")
-                                        : QStringLiteral("Fincept Terminal [%1]").arg(profile));
+    setWindowTitle(profile == "default" ? QStringLiteral("StockQuant Terminal")
+                                        : QStringLiteral("StockQuant Terminal [%1]").arg(profile));
     // Load icon from the embedded Windows resource (IDI_ICON1 in app.rc).
     // Falls back to the .ico beside the executable on other platforms.
     QIcon app_icon;
@@ -321,8 +321,9 @@ WindowFrame::WindowFrame(int window_id, QWidget* parent, const WindowId& adopted
     // a redundant PIN re-entry. The singleton flag is the source of truth for
     // "user has cleared the PIN gate this session"; the per-window field is
     // a cache so on_auth_state_changed() can skip re-prompting.
-    pin_gate_cleared_ = !auth::InactivityGuard::instance().is_terminal_locked() &&
-                        auth::AuthManager::instance().is_authenticated() && auth::PinManager::instance().has_pin();
+    // StockQuant local desktop mode: no Fincept PIN gate at startup.
+    pin_gate_cleared_ = true;
+    auth::InactivityGuard::instance().set_terminal_locked(false);
 
     auto* master_stack = new QStackedWidget;
 
