@@ -65,7 +65,7 @@ void ActionCenter::set_order_mode(const QString& account_id, OrderMode mode) {
 
 OrderMode ActionCenter::get_order_mode(const QString& account_id) const {
     const QString key = "action_center.mode." + account_id;
-    auto r = SettingsRepository::instance().get(key, "auto");
+    auto r = SettingsRepository::instance().get(key, "semi_auto");
     if (r.is_err()) {
         // Fail closed. should_queue() derives straight from this, so reporting
         // the "auto" default on a read error would send a SemiAuto account's
