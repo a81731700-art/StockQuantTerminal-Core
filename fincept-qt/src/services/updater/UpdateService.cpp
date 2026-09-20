@@ -147,74 +147,10 @@ bool UpdateService::is_newer(const QString& local, const QString& remote) {
 // ── Public entry point ──────────────────────────────────────────────────────
 
 void UpdateService::check_for_updates(bool silent) {
-    if (in_progress_) {
-        LOG_INFO("UpdateService", "Check already in progress — ignoring duplicate call");
-        return;
-    }
-    if (silent && silent_check_done_) {
-        LOG_DEBUG("UpdateService", "Silent check already completed this session — skipping");
-        return;
-    }
-    if (silent)
-        silent_check_done_ = true;
-
-    silent_ = silent;
-    update_available_ = false;
-    latest_version_.clear();
-    changelog_.clear();
-    pending_download_url_.clear();
-    pending_expected_sha256_.clear();
-
-    // Skip the check for dev builds — their version string doesn't match the
-    // manifest format and we'd otherwise never find a match.
-    const QString local_version = QApplication::applicationVersion();
-    int maj = 0, min = 0, pat = 0;
-    if (!parse_version(local_version, maj, min, pat)) {
-        LOG_INFO("UpdateService",
-                 QString("Skipping update check — running version '%1' is not a release build").arg(local_version));
-        if (!silent_)
-            show_error(QStringLiteral("This is a development build (%1). Auto-update is disabled.").arg(local_version));
-        emit check_finished(false);
-        return;
-    }
-
-    const QString platform_key = current_platform_key();
-    if (platform_key.isEmpty()) {
-        LOG_WARN("UpdateService", QString("Unsupported platform/arch: %1 / %2")
-                                      .arg(QSysInfo::kernelType(), QSysInfo::currentCpuArchitecture()));
-        if (!silent_)
-            show_error(QStringLiteral("Auto-update is not supported on this platform."));
-        emit check_finished(false);
-        return;
-    }
-
-    // Fail closed: without a pinned signing key we cannot tell an authentic
-    // manifest from one pushed by whoever last compromised the repo, and the
-    // installer we would fetch is auto-launched. Refuse rather than proceed
-    // unsigned. See the signing runbook at the top of this file.
-    if (signing_public_key().isEmpty()) {
-        LOG_ERROR("UpdateService", "AUTO-UPDATE DISABLED — no update-signing public key is pinned in this build. "
-                                   "Set UpdateService::UPDATE_SIGNING_PUBLIC_KEY_HEX and sign updates.json (see the "
-                                   "runbook in UpdateService.cpp) before shipping auto-update.");
-        if (!silent_) {
-            show_error(QStringLiteral("Auto-update is disabled in this build because no update-signing key is "
-                                      "configured.\n\nPlease download updates from the releases page."));
-        }
-        emit check_finished(false);
-        return;
-    }
-
-    in_progress_ = true;
-    pending_manifest_body_.clear();
-    LOG_INFO("UpdateService", QString("Checking for updates — platform=%1, local=%2, manifest=%3")
-                                  .arg(platform_key, local_version, manifest_url_));
-
-    QNetworkRequest req{QUrl(manifest_url_)};
-    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-    req.setHeader(QNetworkRequest::UserAgentHeader,
-                  QString("FinceptTerminal/%1 (%2)").arg(local_version, platform_key));
-    QNetworkReply* reply = net_.get(req);
-    connect(reply, &QNetworkReply::finished, this, &UpdateService::on_manifest_reply_finished);
+    Q_UNUSED(silent);
+    LOG_INFO("UpdateService", "StockQuant build: Fincept updater disabled");
+    if (in_progress_) in_progress_ = false;
+    emit check_finished(false);
 }
 
 // ── Manifest signature ──────────────────────────────────────────────────────
