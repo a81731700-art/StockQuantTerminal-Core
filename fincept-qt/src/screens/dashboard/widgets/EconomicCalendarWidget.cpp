@@ -8,7 +8,7 @@
 #include <QJsonObject>
 
 namespace {
-constexpr const char* kTopic = "econ:fincept:upcoming_events";
+constexpr const char* kTopic = "econ:stockquant:upcoming_events";
 
 // Fixed column widths so header + rows line up regardless of event-name
 // length. QHBoxLayout's stretch factors alone don't align columns when
@@ -83,7 +83,7 @@ EconomicCalendarWidget::EconomicCalendarWidget(QWidget* parent)
 
     // User-driven refresh button on the BaseWidget title bar — force the
     // hub to refresh the topic. Per-producer rate limit (2/sec) still
-    // applies, so rage-clicking can't hammer api.fincept.in.
+    // applies, so rage-clicking can't hammer the calendar provider.
     //
     // We must show the loading overlay BEFORE the request — otherwise the
     // click feels dead when the producer returns the same cached payload
@@ -209,7 +209,7 @@ void EconomicCalendarWidget::populate(const QJsonArray& events) {
             break;
         auto e = v.toObject();
 
-        // Fincept upcoming-events schema (May 2026 endpoint update): each row
+        // StockQuant normalized economic-calendar schema: each row
         // carries event, category, country, date/time, reference_period,
         // actual, forecast, consensus, previous, revised_from, sentiment,
         // symbol, importance, url, chart_url. Tile shows the most important
