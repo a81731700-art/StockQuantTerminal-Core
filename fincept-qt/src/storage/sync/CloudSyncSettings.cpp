@@ -32,14 +32,13 @@ void CloudSyncSettings::ensure_loaded() {
 }
 
 bool CloudSyncSettings::master_enabled() {
-    ensure_loaded();
-    return g_cloudsync_master;
+    return false;
 }
 
 void CloudSyncSettings::set_master_enabled(bool on) {
-    ensure_loaded();
-    g_cloudsync_master = on;
-    SettingsRepository::instance().set(kMasterKey, on ? "1" : "0", kCategory);
+    Q_UNUSED(on);
+    g_cloudsync_loaded = true;
+    g_cloudsync_master = false;
 }
 
 bool CloudSyncSettings::is_domain_excluded(const QString& entity) {
