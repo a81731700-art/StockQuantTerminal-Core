@@ -23,7 +23,7 @@ NavigationBar::NavigationBar(QWidget* parent) : QWidget(parent) {
     };
 
     // FINCEPT / TERMINAL are brand marks — set raw, never translated.
-    hl->addWidget(mk("FINCEPT", "navBrand"));
+    hl->addWidget(mk("STOCKQUANT", "navBrand"));
     hl->addWidget(mk("TERMINAL", "navTitle"));
     hl->addWidget(mk("   ", "navSpacer"));
     hl->addWidget(mk("\xe2\x97\x8f", "navLiveDot")); // U+25CF — pure icon, no translation
@@ -49,6 +49,11 @@ NavigationBar::NavigationBar(QWidget* parent) : QWidget(parent) {
     logout_btn_->setObjectName("navLogout");
     connect(logout_btn_, &QPushButton::clicked, this, &NavigationBar::logout_clicked);
     hl->addWidget(logout_btn_);
+
+    user_label_->setVisible(false);
+    credits_label_->setVisible(false);
+    plan_label_->setVisible(false);
+    logout_btn_->setVisible(false);
 
     clock_timer_ = new QTimer(this);
     clock_timer_->setInterval(1000);
