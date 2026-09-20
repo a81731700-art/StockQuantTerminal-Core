@@ -1077,15 +1077,15 @@ void WindowFrame::set_shell_visible(bool visible) {
     if (!visible) {
         // Reset title to plain app name — no screen suffix while on auth screens
         const QString profile = ProfileManager::instance().active();
-        setWindowTitle(profile == "default" ? QStringLiteral("Fincept Terminal")
-                                            : QStringLiteral("Fincept Terminal [%1]").arg(profile));
+        setWindowTitle(profile == "default" ? QStringLiteral("StockQuant Terminal")
+                                            : QStringLiteral("StockQuant Terminal [%1]").arg(profile));
     }
 }
 
 void WindowFrame::update_window_title() {
     // Brand stays in English; only the workspace/screen suffix (translated
     // via DockScreenRouter::title_for_id) responds to language changes.
-    QString title = QStringLiteral("Fincept Terminal");
+    QString title = QStringLiteral("StockQuant Terminal");
 
     const QString profile = ProfileManager::instance().active();
     if (profile != "default")
