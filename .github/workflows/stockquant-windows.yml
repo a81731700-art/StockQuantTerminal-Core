@@ -3,7 +3,7 @@ name: Build StockQuant Terminal Windows
 on:
   workflow_dispatch:
   push:
-    branches: [main, stockquant-v0.3.1]
+    branches: [main, stockquant-v0.3.1, stockquant-v0.3.2]
     paths:
       - "fincept-qt/**"
       - ".github/workflows/stockquant-windows.yml"
@@ -77,11 +77,11 @@ jobs:
         run: |
           mkdir artifact
           cp fincept-qt/build/Release/FinceptTerminal.exe artifact/StockQuantTerminal.exe
-          printf "StockQuant V0.3.1 direct-source build. Semi-Auto by default; STOP STRATEGIES does not flatten positions.\n" > artifact/README.txt
+          printf "StockQuant V0.3.2 direct-source build. News/calendar/branding cleanup; Semi-Auto by default.\n" > artifact/README.txt
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
-          name: StockQuantTerminal-Core-V0.3.1-Windows-x64
+          name: StockQuantTerminal-Core-V0.3.2-Windows-x64
           path: artifact/
           retention-days: 14
