@@ -231,7 +231,7 @@ void UpgradeDialog::retranslateUi() {
 }
 
 bool UpgradeDialog::startup_prompt_enabled() {
-    return !AppConfig::instance().get(kEntSuppressKey, false).toBool();
+    return false;
 }
 
 void UpgradeDialog::set_startup_prompt_enabled(bool enabled) {
@@ -239,13 +239,7 @@ void UpgradeDialog::set_startup_prompt_enabled(bool enabled) {
 }
 
 void UpgradeDialog::show_now(QWidget* parent) {
-    if (ent_headless_platform())
-        return;
-    auto* dlg = new UpgradeDialog(parent);
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
-    // open() rather than exec(): the startup call site runs inside a timer
-    // callback, and exec() there would spin a nested event loop.
-    dlg->open();
+    Q_UNUSED(parent);
 }
 
 void UpgradeDialog::maybe_show_at_startup(QWidget* parent) {
