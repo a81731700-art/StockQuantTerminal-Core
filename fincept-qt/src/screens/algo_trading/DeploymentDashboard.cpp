@@ -577,7 +577,7 @@ void DeploymentDashboard::build_ui() {
 
     control_bar->addStretch();
 
-    stop_all_btn_ = new QPushButton(tr("STOP ALL"), content);
+    stop_all_btn_ = new QPushButton(tr("STOP STRATEGIES"), content);
     stop_all_btn_->setCursor(Qt::PointingHandCursor);
     stop_all_btn_->setFixedHeight(30);
     stop_all_btn_->setStyleSheet(
@@ -882,7 +882,7 @@ void DeploymentDashboard::retranslateUi() {
     if (refresh_btn_)
         refresh_btn_->setText(tr("REFRESH"));
     if (stop_all_btn_)
-        stop_all_btn_->setText(tr("STOP ALL"));
+        stop_all_btn_->setText(tr("STOP STRATEGIES"));
     if (dep_title_)
         dep_title_->setText(tr("DEPLOYMENTS"));
 
