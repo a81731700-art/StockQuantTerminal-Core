@@ -209,10 +209,12 @@ OrderPlaceResponse IBKRBroker::place_order(const BrokerCredentials& creds, const
     if (order.stop_price > 0)
         order_obj["auxPrice"] = order.stop_price;
     order_obj["acctId"] = acct;
-    // Customer order id: unique per attempt so a retry after an 8s client-side
-    // timeout is rejected by IBKR as a duplicate rather than creating a second
-    // live order (see BrokerClientOrderId.h).
-    order_obj["cOID"] = make_client_order_ref(40);
+    // Stable customer order id: UnifiedTrading stamps client_order_id ONCE
+    // per order intent. Reusing it on retry lets IBKR reject a duplicate after
+    // a client-side timeout instead of opening a second live position.
+    order_obj["cOID"] = order.client_order_id.isEmpty()
+                            ? make_client_order_ref(40)
+                            : order.client_order_id.left(40);
 
     QJsonObject body;
     body["orders"] = QJsonArray{order_obj};
