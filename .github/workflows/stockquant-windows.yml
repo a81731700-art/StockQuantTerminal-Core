@@ -1,0 +1,87 @@
+name: Build StockQuant Terminal Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, stockquant-v0.3.1]
+    paths:
+      - "fincept-qt/**"
+      - ".github/workflows/stockquant-windows.yml"
+
+env:
+  QT_VERSION: "6.8.3"
+  QT_MODULES: "qtcharts qtwebsockets qtmultimedia qtwebengine qtwebchannel qtpositioning qtserialport"
+
+jobs:
+  windows-x64:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout StockQuant source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/Users/runneradmin/AppData/Local/vcpkg/archives
+          key: vcpkg-win2022-openssl-zlib-v1
+
+      - name: Install OpenSSL and zlib
+        shell: bash
+        run: |
+          set -euo pipefail
+          VCPKG_ROOT="${VCPKG_INSTALLATION_ROOT:-C:/vcpkg}"
+          VCPKG_ROOT="${VCPKG_ROOT//\\//}"
+          "$VCPKG_ROOT/vcpkg" install openssl:x64-windows zlib:x64-windows-static-md --no-print-usage
+          echo "OPENSSL_ROOT_DIR=$VCPKG_ROOT/installed/x64-windows" >> "$GITHUB_ENV"
+          echo "ZLIB_ROOT=$VCPKG_ROOT/installed/x64-windows-static-md" >> "$GITHUB_ENV"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          modules: ${{ env.QT_MODULES }}
+          cache: true
+
+      - name: Install yt-dlp
+        shell: pwsh
+        run: pip install yt-dlp
+
+      - name: Remove dangling Qt SQL plugin configs
+        shell: bash
+        run: |
+          SQL_CMAKE="${QT_ROOT_DIR}/lib/cmake/Qt6Sql"
+          if [ -d "$SQL_CMAKE" ]; then
+            for drv in QMYSQLDriverPlugin QPSQLDriverPlugin QODBCDriverPlugin QMimerSQLDriverPlugin; do
+              rm -fv "$SQL_CMAKE/Qt6${drv}"*.cmake || true
+            done
+          fi
+
+      - name: Configure
+        shell: bash
+        working-directory: fincept-qt
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${QT_ROOT_DIR}" -DOPENSSL_ROOT_DIR="${OPENSSL_ROOT_DIR}" -DZLIB_ROOT="${ZLIB_ROOT}" -DZLIB_USE_STATIC_LIBS=ON -DFINCEPT_REQUIRE_BUNDLED_YTDLP=ON
+
+      - name: Build
+        shell: bash
+        working-directory: fincept-qt
+        run: cmake --build build --config Release --parallel 3
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir artifact
+          cp fincept-qt/build/Release/FinceptTerminal.exe artifact/StockQuantTerminal.exe
+          printf "StockQuant V0.3.1 direct-source build. Semi-Auto by default; STOP STRATEGIES does not flatten positions.\n" > artifact/README.txt
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: StockQuantTerminal-Core-V0.3.1-Windows-x64
+          path: artifact/
+          retention-days: 14
