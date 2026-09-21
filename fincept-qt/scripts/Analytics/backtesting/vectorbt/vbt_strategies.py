@@ -88,6 +88,7 @@ def build_strategy_signals(
         'macd': _macd_strategy,
         'macd_crossover': _macd_strategy,
         'rsi': _rsi_strategy,
+        's10_rsi2_pullback': _s10_rsi2_pullback,
         'bollinger_bands': _bollinger_bands,
         'mean_reversion': _mean_reversion,
         'momentum': _momentum,
@@ -242,6 +243,52 @@ def _rsi_strategy(vbt, close, high, low, volume, index, params) -> Tuple[pd.Seri
 
     rsi = ind.calculate_rsi(vbt, close, period)
     return ind.generate_threshold_signals(rsi, oversold, overbought, index)
+
+
+def _s10_rsi2_pullback(vbt, close, high, low, volume, index, params) -> Tuple[pd.Series, pd.Series]:
+    """StockQuant S10 Frozen: RSI(2) pullback in a SMA200 uptrend.
+
+    Signal semantics are intentionally frozen:
+      Entry signal: Close > SMA(200) and RSI(2) < 5.
+      Exit signal:  Close > SMA(5), or after 5 bars maximum holding time.
+
+    Signals are generated only from completed bars. Execution timing remains the
+    responsibility of the VectorBT provider so S10 can share the same backtest
+    infrastructure and cost assumptions as the built-in strategies.
+    """
+    rsi_period = int(params.get('rsiPeriod', 2))
+    oversold = float(params.get('oversold', 5))
+    trend_period = int(params.get('trendSmaPeriod', 200))
+    exit_period = int(params.get('exitSmaPeriod', 5))
+    max_hold = int(params.get('maxHoldBars', 5))
+
+    rsi = np.asarray(ind.calculate_rsi(vbt, close, rsi_period), dtype=float)
+    trend_sma = np.asarray(ind.calculate_ma(vbt, close, trend_period, ewm=False), dtype=float)
+    exit_sma = np.asarray(ind.calculate_ma(vbt, close, exit_period, ewm=False), dtype=float)
+
+    raw_entries = (close > trend_sma) & (rsi < oversold)
+    exit_condition = close > exit_sma
+
+    # Build stateful entry/exit pulses so max-hold is measured from the actual
+    # accepted S10 entry rather than every oversold bar.
+    entries = np.zeros(len(close), dtype=bool)
+    exits = np.zeros(len(close), dtype=bool)
+    in_position = False
+    bars_held = 0
+    for i in range(len(close)):
+        if not in_position:
+            if raw_entries[i]:
+                entries[i] = True
+                in_position = True
+                bars_held = 0
+        else:
+            bars_held += 1
+            if exit_condition[i] or bars_held >= max_hold:
+                exits[i] = True
+                in_position = False
+                bars_held = 0
+
+    return pd.Series(entries, index=index), pd.Series(exits, index=index)
 
 
 def _stochastic(vbt, close, high, low, volume, index, params) -> Tuple[pd.Series, pd.Series]:
@@ -680,6 +727,19 @@ def get_strategy_catalog() -> list:
                 {'id': 'period', 'name': 'Period', 'default': 14, 'min': 2, 'max': 50},
                 {'id': 'oversold', 'name': 'Oversold', 'default': 30, 'min': 10, 'max': 40},
                 {'id': 'overbought', 'name': 'Overbought', 'default': 70, 'min': 60, 'max': 95},
+            ],
+        },
+        {
+            'type': 's10_rsi2_pullback',
+            'name': 'S10 RSI2 Pullback (Frozen)',
+            'category': 'Mean Reversion',
+            'description': 'StockQuant frozen S10: Close>SMA200, RSI(2)<5; exit Close>SMA5 or max 5 bars',
+            'parameters': [
+                {'id': 'rsiPeriod', 'name': 'RSI Period', 'default': 2, 'min': 2, 'max': 2},
+                {'id': 'oversold', 'name': 'RSI Entry', 'default': 5, 'min': 5, 'max': 5},
+                {'id': 'trendSmaPeriod', 'name': 'Trend SMA', 'default': 200, 'min': 200, 'max': 200},
+                {'id': 'exitSmaPeriod', 'name': 'Exit SMA', 'default': 5, 'min': 5, 'max': 5},
+                {'id': 'maxHoldBars', 'name': 'Max Hold Bars', 'default': 5, 'min': 5, 'max': 5},
             ],
         },
         {
