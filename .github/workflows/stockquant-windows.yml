@@ -77,7 +77,7 @@ jobs:
         run: |
           mkdir artifact
           cp fincept-qt/build/Release/FinceptTerminal.exe artifact/StockQuantTerminal.exe
-          printf "StockQuant V0.3.3 hotfix build. Enforce fresh dashboard news + independent keyless economic calendar; Semi-Auto by default.\n" > artifact/README.txt
+          printf "StockQuant V0.3.3 strategy-loader build. Drop-in VectorBT custom strategies + frozen S10; Semi-Auto by default.\n" > artifact/README.txt
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
