@@ -11,7 +11,7 @@ namespace fincept::screens::widgets {
 
 namespace {
 constexpr const char* kTopic = "news:general";
-constexpr int kMaxArticles = 30; // headline cap; NewsService publishes the full feed
+constexpr int kMaxArticles = 30; // headline cap; same NewsService/DataHub feed as the full NEWS screen\nconstexpr qint64 kMaxArticleAgeSecs = 14LL * 24 * 60 * 60;
 } // namespace
 
 NewsWidget::NewsWidget(QWidget* parent) : BaseWidget(tr("MARKET NEWS"), parent, ui::colors::CYAN) {
